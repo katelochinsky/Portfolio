@@ -1,7 +1,8 @@
-## Дэшборд 'Анализ конференций TED'
+## Примеры моих работ по аналитике и визуализации данных
 
-Разработан на Yandex Datalens
+### Стек: 
 
-Ссылка на дэшборд <https://datalens.yandex/o65suk95jvcmb>
-
-![Изображение](https://disk.yandex.ru/i/LEPMf1_JM_5jJA)
+- SQL (select, join, union, cte, подзапросы, оконные функции)
+- Python (pandas, numpy, scipy, matplotlib, seaborn)
+- DataLens
+- Superset
