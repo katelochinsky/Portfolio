@@ -6,3 +6,4 @@
 - Python (pandas, numpy, scipy, matplotlib, seaborn)
 - DataLens
 - Superset
+- Метрики (DAU, MAU, CR, RR, LTV, AOV)
