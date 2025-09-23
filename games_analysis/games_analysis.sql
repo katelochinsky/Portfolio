@@ -1,22 +1,13 @@
-/* Проект «Секреты Тёмнолесья»
- * Цель проекта: изучить влияние характеристик игроков и их игровых персонажей 
- * на покупку внутриигровой валюты «райские лепестки», а также оценить 
- * активность игроков при совершении внутриигровых покупок
- * 
- * Автор: Екатерина Лощинская
- * Дата: 18.11.2024
-*/
 
--- Часть 1. Исследовательский анализ данных
--- Задача 1. Исследование доли платящих игроков
--- 1.1. Доля платящих пользователей по всем данным:
+
+-- Доля платящих пользователей по всем данным:
 SELECT
 	COUNT (id) AS total_users, --общее количество игроков, зарегистрированных в игре
 	SUM(payer) AS total_payers, --количество платящих игроков
 	ROUND(AVG(payer),4) AS payers_percentage --доля платящих игроков от общего количества пользователей
 FROM fantasy.users
 WHERE payer=1 OR payer=0; --правка по ревью
--- 1.2. Доля платящих пользователей в разрезе расы персонажа:
+-- Доля платящих пользователей в разрезе расы персонажа:
 SELECT 
 	race.race, -- раса персонажа
 	SUM(users.payer) AS total_payers,-- количество платящих игроков
@@ -26,8 +17,8 @@ FROM fantasy.users
 JOIN fantasy.race USING(race_id)
 GROUP BY race.race
 ORDER BY total_payers DESC; --правка по ревью
--- Задача 2. Исследование внутриигровых покупок
--- 2.1. Статистические показатели по полю amount:
+-- Исследование внутриигровых покупок
+-- Статистические показатели по полю amount:
 WITH cte AS (
 SELECT 
 	transaction_id,
@@ -47,7 +38,7 @@ GROUP BY transaction_id)
 FROM fantasy.events
 LEFT JOIN cte ON events.transaction_id=cte.transaction_id
 WHERE amount IS NOT NULL;
--- 2.2: Аномальные нулевые покупки
+-- Аномальные нулевые покупки
 WITH zero AS (
 	SELECT 
 		COUNT(*) AS zero_purchase_count --количество нулевых покупок
@@ -63,20 +54,20 @@ SELECT
 	total_purchase_count, -- общее количество покупок
 	ROUND((zero_purchase_count::NUMERIC/total_purchase_count::NUMERIC),4)  AS zero_amount_share-- доля нулевых покупок
 FROM zero, total;
---Правка по ревью
+
 SELECT 
 COUNT(transaction_id) FILTER (WHERE amount = 0), 
 COUNT(transaction_id),
 ROUND (((COUNT(transaction_id) FILTER (WHERE amount = 0))::NUMERIC/COUNT(transaction_id)::NUMERIC),4)
 FROM fantasy.events;
--- Правка по ревью. Какие эпические предметы купили за нулевую стоимость:
+--  Какие эпические предметы купили за нулевую стоимость:
 SELECT COUNT (events.transaction_id) AS zero_purchase_count, --количество нулевых покупок
  		items.game_items AS item_name --название эпического предмета
 FROM fantasy.events
 JOIN fantasy.items ON events.item_code=items.item_code
 WHERE amount = 0
 GROUP BY items.game_items; 
--- 2.3: Сравнительный анализ активности платящих и неплатящих игроков:
+-- Сравнительный анализ активности платящих и неплатящих игроков:
 /*SELECT 
 	CASE WHEN users.payer=0
 	THEN 'nonpayers' --неплатящие игроки
@@ -91,7 +82,7 @@ WHERE events.transaction_id NOT IN (SELECT transaction_id
 			FROM fantasy.events 
 			WHERE amount=0)
 GROUP BY users.payer; */
---Правка по ревью. Оптимизация запроса
+
 WITH cte AS (
 SELECT users.id AS user_id,
 		users.payer AS payer,
@@ -135,7 +126,7 @@ SELECT
 FROM cte
 GROUP BY payer, race
 ORDER BY race, payer;
--- 2.4: Популярные эпические предметы:
+--Популярные эпические предметы:
 SELECT  
 		i.game_items AS item_name,
 		COUNT(e.transaction_id) AS item_count,--общее количество внутриигровых продаж для каждого предмета
@@ -152,15 +143,15 @@ JOIN fantasy.items i USING(item_code)
 WHERE e.transaction_id NOT IN (SELECT transaction_id FROM fantasy.events WHERE amount=0)
 GROUP BY item_name
 ORDER BY item_count DESC;
---Правка по ревью. Эпические предметы, которые не купили ни разу:
+--Эпические предметы, которые не купили ни разу:
 SELECT game_items, --название предмета
 		COUNT (game_items) OVER() -- общее количество всех предметов
 FROM fantasy.items
 WHERE game_items NOT IN (SELECT items.game_items AS item_name									
 							FROM fantasy.events 
 							JOIN fantasy.items USING(item_code));
--- Часть 2. Решение ad hoc-задач
--- Задача 1. Зависимость активности игроков от расы персонажа:
+
+-- Зависимость активности игроков от расы персонажа:
 WITH cte1 AS (
 		SELECT 
 			race.race AS race, 
@@ -202,7 +193,7 @@ INNER JOIN cte2 ON cte1.race=cte2.race
 INNER JOIN cte3 ON cte2.race=cte3.race
 GROUP BY cte1.race, cte1.total_users,cte2.total_buyers,cte2.total_payers
 ORDER BY cte1.total_users desc;
--- Задача 2: Частота покупок
--- Напишите ваш запрос здесь
+
+
 
 
